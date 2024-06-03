@@ -1,0 +1,16 @@
+# Get from HoyoLab
+# Guide https://thesadru.github.io/genshin.py/authentication/
+# Then rename this file to data.yaml
+"Akun 1":
+    ltuid: 90051980
+    ltoken: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    game: 
+        - GI
+        - HI3
+        - HSR
+
+"Akun 2":
+    ltuid: 10000002
+    ltoken: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    game: 
+        - GI
