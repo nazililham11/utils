@@ -55,12 +55,12 @@ presets:
         - "Animagine Cinematic"
 
       default_loras:
-        - [ true, "None", 0.35 ]
-        - [ true, "None", 0.5 ]
-        - [ true, "None", 0.5 ]
-        - [ true, "None", 0.5 ]
-        - [ true, "None", 0.5 ]
-        - [ true, "None", 0.5 ]
+        - [ true, None, 0.35 ]
+        - [ true, None, 0.5 ]
+        - [ true, None, 0.5 ]
+        - [ true, None, 0.5 ]
+        - [ true, None, 0.5 ]
+        - [ true, None, 0.5 ]
 
       default_prompt :
         1girl, fischl, genshin impact, sitting, crossing legs, moody, looking down,
@@ -158,3 +158,297 @@ unused:
   - "/content/Fooocus/sdxl_styles/sdxl_styles_twri.json"
   - "/content/Fooocus/sdxl_styles/sdxl_styles_diva.json"
   - "/content/Fooocus/sdxl_styles/sdxl_styles_marc_k3nt3l.json"
+
+wildcard_suggestion: true
+suggestions: |
+  portrait
+  upper body
+  lower body
+  cowboy shot
+  feet out of frame
+  full body
+  wide shot
+  very wide shot
+  close-up
+  cut-in
+  cropped legs
+  head out of frame
+  cropped torso
+  cropped arms
+  cropped shoulders
+  profile
+  group profile
+  alphonse mucha
+  art deco
+  color trace
+  cosplay
+  cyberpunk
+  expression chart
+  faux figurine
+  faux traditional media
+  fine art parody
+  flame painter
+  flat color
+  fourth wall
+  impressionism
+  ligne claire
+  minimalism
+  nihonga
+  pastel color
+  photorealistic
+  realistic
+  retro artstyle
+  sketch
+  style parody
+  sumi-e
+  surreal
+  traditional media
+  ukiyo-e
+  unfinished
+  variations
+  full moon
+  moon
+  moonlight
+  night
+  night sky
+  blue moon
+  sky
+  starry sky
+  sun
+  skyline
+  shooting star
+  sunburst background
+  sunset
+  beautiful detailed sky
+  day
+  dusk
+  in spring
+  in summer
+  in autumn
+  in winter
+  stars
+  cloudy
+  rain
+  in the rain
+  rainy days
+  beach
+  shore
+  canyon
+  cave
+  cliff
+  desert
+  oasis
+  forest
+  bamboo forest
+  glacier
+  hill
+  island
+  floating island
+  jungle
+  meadow
+  mountain
+  volcano
+  nature
+  park
+  playground
+  parking lot
+  plain
+  savannah
+  wetland
+  water
+  geyser
+  lake
+  ocean
+  ocean bottom
+  pond
+  river
+  stream
+  waterfall
+  wasteland
+  flower field
+  bathroom
+  bathtub
+  toilet stall
+  shower
+  bedroom
+  hotel room
+  messy room
+  otaku room
+  cafeteria
+  changing room
+  classroom
+  clubroom
+  conservatory
+  courtroom
+  dining room
+  dressing room
+  dungeon
+  prison cell
+  fitting room
+  gym
+  locker room
+  gym storeroom
+  infirmary
+  kitchen
+  laboratory
+  library
+  living room
+  office
+  cubicle
+  stage
+  staff room
+  storage room
+  armory
+  closet
+  workshop
+  landscape
+  scenary
+  science fiction
+  scifi
+  sci-fi
+  futuristic
+  sci fi
+  gradient background
+  simple background
+  transparent background
+  transparent gif
+  transparent png
+  pentagram
+  magic circle
+  magical circle
+  magic circles
+  magical circles
+  valentine
+  valentines
+  valentine's day
+  valentines day
+  halloween
+  christmas
+  xmas
+  outdoors
+  outside
+  outdoor
+  indoors
+  feather
+  beautiful detailed water
+  white background
+  chromatic aberration
+  lens flare
+  motion blur
+  sparkle
+  jpeg artifacts
+  blurry
+  cinematic lighting
+  glowing light
+  god rays
+  ray tracing
+  reflection light
+  overexposure
+  backlighting
+  blending
+  bloom
+  bokeh
+  caustics
+  chiaroscuro
+  chromatic aberration abuse
+  diffraction spikes
+  depth of field
+  dithering
+  drop shadow
+  emphasis lines
+  foreshortening
+  halftone
+  image fill
+  lens flare abuse
+  motion lines
+  multiple monochrome
+  optical illusion
+  anaglyph
+  stereogram
+  scanlines
+  silhouette
+  speed lines
+  vignetting
+  airport
+  control tower
+  hangar
+  apartment
+  aquarium
+  arcade
+  bar
+  izakaya
+  tavern
+  barn
+  bunker
+  bus stop
+  bowling alley
+  cafe
+  casino
+  castle
+  floating castle
+  church
+  construction site
+  convention
+  garage
+  gas station
+  gazebo
+  greenhouse
+  hospital
+  house
+  hotel
+  hut
+  industrial
+  factory
+  refinery
+  powerplant
+  nuclear powerplant
+  cooling tower
+  warehouse
+  lighthouse
+  mall
+  megastructure
+  space elevator
+  military base
+  mosque
+  museum
+  art gallery
+  nightclub
+  observatory
+  onsen
+  pagoda
+  planetarium
+  prison
+  restaurant
+  rooftop
+  ruins
+  school
+  skating rink
+  shack
+  shrine
+  shop
+  bakery
+  bookstore
+  convenience store
+  flower shop
+  pharmacy
+  salon
+  sex shop
+  supermarket
+  weapon shop
+  skyscraper
+  stadium
+  arena
+  stilt house
+  temple
+  theater
+  amphitheater
+  movie theater
+  tower
+  bell tower
+  clock tower
+  guard tower
+  minaret
+  train station
+  treehouse
+  windmill
+  pool
