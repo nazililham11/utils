@@ -9,7 +9,7 @@
 // @grant        none
 // ==/UserScript==
 
-import 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getDatabase, ref, query, limitToLast, set, onValue, onChildAdded } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 import { reactive, createApp, ref as ref$1, computed } from 'https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.esm-browser.js';
 
@@ -357,7 +357,7 @@ function initFirebase(config) {
     if (isConnected()) return
 
     try {
-        app = firebaseapp.initializeApp(config);
+        app = initializeApp(config);
         database = getDatabase(app);
         console.log("connected to firebase");
     } catch (e) {
