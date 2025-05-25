@@ -17,7 +17,7 @@ import { reactive, createApp, ref as ref$1, computed } from 'https://cdn.jsdeliv
 // Utils
 //
 
-const isNumber = (n) => typeof n === "number";
+const isString = (n) => typeof n === "string";
 const isObject = (n) => typeof n === "object";
 const isArray = (n) => Array.isArray(n);
 
@@ -100,29 +100,6 @@ function isMobileBrowser() {
     }
     return false
 }
-function getTimeStr(dateStr) {
-    return toDate(dateStr)?.toTimeString().split(" ").shift() ?? "invalid date"
-}
-function toDate(dateStr) {
-    const date = new Date(dateStr);
-    return date !== "Invalid Date" && !isNaN(date) ? date : undefined
-}
-function stringLimit(string, options = {}) {
-    let sliced = false;
-    if (isNumber(options.maxLine) && string.split("\n").length >= options.maxLine) {
-        string = string.split("\n").slice(0, options.maxLine).join("\n");
-        sliced = true;
-    }
-    if (isNumber(options.maxCharacters) && string.length >= options.maxCharacters) {
-        string = string.substr(0, options.maxCharacters);
-        sliced = true;
-    }
-    if (sliced) {
-        string = string + (options.endStr ?? "...");
-    }
-
-    return string
-}
 const dateComparator = (a, b, dec) => (dec ? -1 : 1 * (new Date(a) - new Date(b)));
 const stringComparator = (a, b, dec) => (dec ? -1 : 1 * (a + "").localeCompare(b + ""));
 const numberComparator = (a, b, dec) => (dec ? -1 : 1 * ((parseInt(a) || 0) - (parseInt(b) || 0)));
@@ -199,9 +176,7 @@ function Animagine() {
     const defaultValue = {};
     const elements = {};
     const components = {};
-    const version = gradio_config.space_id.split("-").pop() || "unknown";
     const $this = {
-        version,
         defaultValue,
         components,
         elements,
@@ -213,12 +188,9 @@ function Animagine() {
         SetDarkMode,
         isDarkMode
     };
-    console.log($this);
-    console.log(this);
 
     const callbacks = { onload: function () {}, onrefresh: function () {}, ongenerate: function () {} };
 
-    if (version !== "unknown") console.log("detect animagine version", version);
 
     function on(eventKey, callback) {
         if (eventKey in callbacks) {
@@ -255,14 +227,16 @@ function Animagine() {
 
             const component = comp[key].props;
             component.id = comp[key].id; 
-            component.elementId = `#component-${comp[key].id}`;
+            component.elementId = `component-${comp[key].id}`;
             
             components[key] = component;
         }
-        console.log("props", components);
+        console.log("components", components);
         
     }
     function bindUI() {
+        const version = $this.version;
+
         if (version === "3.1") {
             const [tab1Container, tab2Container] = [...document.querySelectorAll(".tabitem")];
             elements.tab1Container = tab1Container;
@@ -279,16 +253,19 @@ function Animagine() {
 
         elements.generate = [...document.querySelectorAll("button")].filter((el) => el.innerText === "Generate").shift();
         elements.generate.addEventListener("click", () => callbacks.ongenerate());
+        elements.examples = [...document.querySelectorAll("[id^='component-']")]
+            .filter((el) => el.innerText.startsWith("Example"))
+            .shift();
 
         for (const key in components) {
-            const query = components[key].elementId + (components[key].name === "textbox" ? " textarea" : "");
-            elements[key] = [...document.querySelectorAll(query)].shift();
+            const id = components[key].elementId;
+            const query = components[key].name === "textbox" ? `#${id} textarea` : `#${id}`;
+            elements[key] = document.querySelector(query);
         }
-
-        console.log(elements);
+        console.log("elements ", elements);
     }
     function refresh() {
-        if (version === "3.1") {
+        if ($this.version === "3.1") {
             // switch tab to re render the ui :)
             elements.tab2Button?.click();
             setTimeout(() => {
@@ -312,9 +289,15 @@ function Animagine() {
         return result
     }
     function init() {
-        Object.assign(defaultValue, readInputs());
-        bindComponent();
-        bindUI();
+        const version = gradio_config.space_id.split("-").pop();
+        if (version) {
+            $this.version = version;
+            console.log("detect animagine version", version);
+            Object.assign(defaultValue, readInputs());
+            bindComponent();
+            bindUI();
+        }
+        
     }
     function startPageLoadInspector() {
         const scan = setInterval(() => {
@@ -343,8 +326,7 @@ function Animagine() {
 //
 // Firebase
 //
-// import { initializeApp } from "firebase/app"
-// import { getDatabase, query, limitToLast, onValue, onChildAdded, ref, set, update } from "firebase/database"
+
 
 var app, database;
 
@@ -465,46 +447,42 @@ function localStore(key, initialValue) {
     return { get, set, type: typeof initialValue }
 }
 
-// import { createApp, ref, computed, reactive } from "https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.esm-browser.js"
-
 async function App() {
-    // console.log(vue)
     loadExternal("https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css");
 
-    // const VUE_CDN = "https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.32/vue.esm-browser.min.js"
     const MAX_VISIBLE_HISTORY = 500;
-    // const { createApp, ref, computed, reactive } = await import(VUE_CDN)
 
     const Data = reactive({ historyList: [], showedHistory: {} });
 
     const groupByChoices = "date|usage|aspec_ratio|quality|style|upscale|-".split("|");
     const sortByChoices = "date:date|num:usage|str:aspec_ratio|str:quality|str:style|str:upscale".split("|");
 
+    const prevParams = {};
+    const defaultParams = { sortCmd: sortByChoices[0], isAscending: false, groupBy: groupByChoices[0], keywords: "" };
+
     let searchBoxFocus = function () {};
     let itemOnClickCallback = function () {};
 
-    let currentSortCmd = sortByChoices[0];
-    let currentIsAscending = false;
-    let currentGroupBy = groupByChoices[0];
-    let currentSearchBy = "";
-    function renderHistory(sortCmd, isAscending, groupKey, keywords) {
-        sortCmd = currentSortCmd = sortCmd ?? currentSortCmd;
-        isAscending = currentIsAscending = isAscending ?? currentIsAscending;
-        keywords = currentSearchBy = keywords ?? currentSearchBy;
-        groupKey = currentGroupBy = groupKey ?? currentGroupBy;
+    function renderHistory(params) {
+        params = params || {};
+        params = Object.assign(defaultParams, prevParams, params);
+        Object.assign(prevParams, params);
+
+        const { sortCmd, isAscending, keywords, groupKey } = params;
 
         let result = Data.historyList;
-        if (keywords && keywords.length > 0) {
+
+        if (isString(keywords) && keywords.length > 1) {
             keywords = keywords.toLowerCase();
             result = result.filter((h) => {
                 const payload = Object.values(h).join(" , ").toLowerCase();
-                for (const keyword of keywords.split(" ")) {
-                    if (payload.indexOf(keyword) == -1) return false
+                for (const keywords of keywords.split(" ")) {
+                    if (payload.indexOf(keywords) == -1) return false
                 }
                 return true
             });
         }
-        if (sortCmd) {
+        if (isString(sortCmd) && sortCmd.length > 1) {
             result = sort(result, (isAscending ? "" : "-") + sortCmd);
         }
 
@@ -512,10 +490,10 @@ async function App() {
 
         if (groupKey === "date") {
             result = Object.groupBy(result, ({ date }) => new Date(date).toDateString());
-        } else if (typeof groupKey == "string" && groupByChoices.indexOf(groupKey) > -1 && groupKey !== "-") {
+        } else if (isString(groupKey) && groupByChoices.indexOf(groupKey) > -1 && groupKey !== "-") {
             result = Object.groupBy(result, (data) => data[groupKey]);
         } else {
-            result = Object.groupBy(result, () => " ");
+            result = Object.groupBy(result, () => "");
         }
 
         Data.showedHistory = Object.entries(result).map(([key, value]) => {
@@ -543,11 +521,11 @@ async function App() {
         setup() {
             const search = ref$1(null);
             const onExit = () => hide();
-            const onSearch = () => renderHistory(null, null, null, search.value.value);
-            const onReset = () => renderHistory(sortByChoices[0], false, groupByChoices[0], "");
-            const sortOnChange = (sortCmd) => renderHistory(sortCmd, null, null, null);
-            const groupOnChange = (propKey) => renderHistory(null, null, propKey, null);
-            const ascendingOnChange = (state) => renderHistory(null, state, null, null);
+            const onSearch = () => renderHistory({ keywords: search.value.value });
+            const onReset = () => renderHistory(defaultParams);
+            const sortOnChange = (sortCmd) => renderHistory({ sortCmd: sortCmd });
+            const groupOnChange = (propKey) => renderHistory({ groupBy: propKey });
+            const ascendingOnChange = (state) => renderHistory({ isAscending: state });
             const sortChoices = sortByChoices.map((s) => ({ title: s.split(":").pop(), value: s }));
             const groupChoices = groupByChoices.map((s) => ({ title: s, value: s }));
 
@@ -569,19 +547,16 @@ async function App() {
         template: `
             <div class="row m-0 g-3 w-100">
                 <div class="col-sm-6 col-12 row align-items-end gap-sm-3 gap-2">
-                    <label class="col-auto form-check form-switch my-auto d-flex
-                            flex-column align-items-end text-secondary text-small">
+                    <label class="col-auto form-check form-switch my-auto d-flex flex-column align-items-end text-secondary text-small">
                         Asc
-                        <input class="form-check-input" type="checkbox"
-                            @change="e => ascendingOnChange(e.target.checked)">
+                        <input class="form-check-input" type="checkbox" @change="e => ascendingOnChange(e.target.checked)">
                     </label>
                     <Dropdown label="Sort By" :items="sortChoices" @onChange="sortOnChange"/>
                     <Dropdown label="Group By" :items="groupChoices" @onChange="groupOnChange"/>
                 </div>
 
                 <div class="col-sm-6 col-12 d-flex align-items-end gap-sm-3 gap-2">
-                    <input type="text" class="form-control form-control-sm flex-fill"
-                        ref="search" placeholder="Search" @keyup.enter="onSearch">
+                    <input type="text" class="form-control form-control-sm flex-fill" ref="search" placeholder="Search" @keyup.enter="onSearch">
                     <button class="btn btn-sm btn-outline-primary" @click="onSearch">Search</button>
                     <button class="btn btn-sm btn-outline-primary" @click="onReset">Reset</button>
                     <button class="btn btn-sm btn-outline-primary" @click="onExit">Exit</button>
@@ -593,19 +568,17 @@ async function App() {
     const HistoryItem = {
         props: ["data"],
         setup(props) {
-            const timeStr = getTimeStr(props.data.date);
+            const timeStr = new Date(props.data.date).toLocaleTimeString().replace(".", ":");
             const onClick = () => itemOnClick(props.data);
 
-            const parsePrompt = (str) => stringLimit(str, { maxLine: 5, maxCharacters: 300 }).replaceAll("\n", "<br>");
-
-            const prompt = parsePrompt(props.data.prompt);
-            const negative_prompt = parsePrompt(props.data.negative_prompt);
+            const prompt = props.data.prompt;
+            const negative_prompt = props.data.negative_prompt;
 
             return { onClick, timeStr, prompt, negative_prompt }
         },
         template: `
-            <button class="card position-relative p-0 btn btn-link text-decoration-none history-item"
-                    @click="e => e.stopImmediatePropagation() || onClick()">
+            <button class="card position-relative p-0 btn btn-link text-decoration-none history-item" 
+                @click="e => e.stopImmediatePropagation() || onClick()">
 
                 <div class="card-header">
                     <small class="me-1 mb-1 badge border">{{ timeStr }}</small>
@@ -616,12 +589,11 @@ async function App() {
                 </div>
 
                 <div class="card-body d-flex flex-wrap">
-                    <p class="text-small text-start" v-html="prompt"/>
-                    <p class="text-small text-start text-danger" v-html="negative_prompt"/>
+                    <p class="text-small text-start prompt-view" v-html="prompt"/>
+                    <p class="text-small text-start prompt-view text-danger" v-html="negative_prompt"/>
                 </div>
 
-                <span class="position-absolute top-0 start-100
-                        translate-middle badge rounded-pill bg-danger"
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                     v-show="data.usage">
                     {{ data.usage }}
                 </span>
@@ -639,13 +611,13 @@ async function App() {
         template: `
             <template v-for="_group of historyList" :key="_group.title">
                 <button class="col-12 text-start mt-4 text-base btn btn-link text-decoration-none fs-5 border-bottom"
-                    v-show="(_group.title + '').length"
+                    v-show="(_group.title + '').length" 
                     @click="_group.hide = !_group.hide">
                     {{ _group.hide ? '&#x25B8;' : '&#x25BE;' }}
                     {{ _group.title }} ({{ _group.data.length }})
                 </button>
 
-                <div class="col-lg-3 col-md-4 col-sm-6 col-12" v-show="!_group.hide"
+                <div class="col-lg-3 col-md-4 col-sm-6 col-12" v-show="!_group.hide" 
                     v-for="_history of _group.data" :key="_history.date">
                     <HistoryItem :data="_history" />
                 </div>
@@ -684,6 +656,13 @@ async function App() {
         }
         .text-base { color: var(--bs-body-color); }
         .text-small { font-size: .75em; }
+        .prompt-view {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 6;
+            white-space: pre-line;
+        }
     `);
 
     function on(eventKey, callback) {
@@ -1150,12 +1129,16 @@ async function main() {
 
     queryEl("body").styles({ position: "relative" });
     queryEl(".gradio-container").styles({ "max-width": "100%", margin: "0" });
-    queryEl("#component-0").styles({ padding: "0", "max-width": "100%" });
+    queryEl("#component-0").styles({ padding: "0", "max-width": "100%", width: "100%" });
+
+    if (animagine.elements.examples) {
+        animagine.elements.examples.style["display"] = "none";
+    }
 
     if (animagine.version == "3.1") {
         queryEl(`[id^="component"][style*="flex-grow"]`).styles({ "flex-grow": "1" });
         queryEl("#title span").styles({ padding: "1rem 2rem", color: "var(--body-text-color)", display: "block", width: "100%" });
-        queryEl(`${animagine.components.images.elementId} :first-child`).styles({ "z-index": 80 });
+        queryEl(`#${animagine.components.images.elementId} :first-child`).styles({ "z-index": 80 });
     } else if (animagine.version == "4.0") {
         queryEl(".contain").styles({ margin: "0", maxWidth: "100%" });
     }
